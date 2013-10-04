@@ -8,10 +8,12 @@ import System.FilePath.Posix
 import Text.Shakespeare.Text (st)
 import Yak.FrontMatter
 import Yak.Layout
+import Yak.Liquid
 import Yak.Pandoc
 import Yak.Types
 
 import qualified Data.Text as T
+import qualified Data.Text.IO as T
 
 loadPosts :: FilePath -> IO [Post]
 loadPosts _posts = do
@@ -42,11 +44,8 @@ loadPosts _posts = do
                 , postContent   = html
                 }
 
-        permalink :: FilePath -> Text
-        permalink fp = [st|/posts/#{dropExtension fp}/|]
-
         isPost :: FilePath -> Bool
-        isPost = undefined
+        isPost = (== ".md") . takeExtension
 
 renderPost :: Post -> Yak ()
 renderPost p = do
@@ -59,4 +58,26 @@ renderPost p = do
             , "index.html"
             ]
 
-    undefined
+    mlayout <- findLayout $ postLayout p
+
+    rendered <- case mlayout of
+        Just layout -> renderPostWithLayout p layout
+        Nothing     -> renderPostWithoutLayout p
+
+    liftIO $ T.writeFile path rendered
+
+renderPostWithLayout :: Post -> Layout -> Yak Text
+renderPostWithLayout p layout = do
+    let context = withPostContext (postContent p) p
+
+    rendered <- liftIO $ liquid (layoutContent layout) context
+    mlayout  <- findLayout $ layoutLayout layout
+
+    case mlayout of
+        Just parent -> renderWithLayout rendered parent
+        Nothing     -> return rendered
+
+renderPostWithoutLayout :: Post -> Yak Text
+renderPostWithoutLayout p = do
+    let context = withPostContext (postContent p) p
+    liftIO $ liquid (postContent p) context

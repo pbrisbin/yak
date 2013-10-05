@@ -4,6 +4,7 @@ module Yak.FrontMatter
     , splitFrontMatter
     ) where
 
+import Control.Exception
 import Data.Maybe
 import Data.Text (Text)
 import Data.Yaml
@@ -17,9 +18,13 @@ import qualified Data.Text.IO as T
 hasFrontMatter :: FilePath -> IO Bool
 hasFrontMatter fp = do
     h    <- openFile fp ReadMode
-    line <- fmap T.strip $ T.hGetLine h
+    line <- fmap T.strip $ T.hGetLine h `catch` handleError
 
     return $ line == "---"
+
+    where
+        handleError :: IOException -> IO Text
+        handleError _ = return ""
 
 splitFrontMatter :: FilePath -> IO (FrontMatter, Text)
 splitFrontMatter fp = do

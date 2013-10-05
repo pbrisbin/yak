@@ -65,11 +65,11 @@ withSiteContext content = do
 
     return $ [st|
     {
-        "content": "#{content}",
+        "content": "#{escape content}",
         "site": {
-            "title": "#{siteTitle site}",
-            "url": "#{siteUrl site}",
-            "posts": [#{T.intercalate ", " $ map postContext $ sitePosts site}]
+            "title": "#{escape $ siteTitle site}",
+            "url": "#{escape $ siteUrl site}",
+            "posts": [#{escape $ T.intercalate ", " $ map postContext $ sitePosts site}]
         }
     }
     |]
@@ -77,17 +77,20 @@ withSiteContext content = do
 withPostContext :: Text -> Post -> Text
 withPostContext content p = [st|
 {
-    "content": "#{content}",
-    "post": #{postContext p}
+    "content": "#{escape content}",
+    "post": #{escape $ postContext p}
 }
 |]
 
 postContext :: Post -> Text
 postContext p = [st|
 {
-    "title": "#{postTitle p}",
-    "permalink": "#{postPermalink p}",
-    "content": "#{postContent p}"
-    "tags": [#{T.intercalate ", " $ postTags p}],
+    "title": "#{escape $ postTitle p}",
+    "permalink": "#{escape $ postPermalink p}",
+    "content": "#{escape $ postContent p}"
+    "tags": [#{escape $ T.intercalate ", " $ postTags p}],
 }
 |]
+
+escape :: Text -> Text
+escape = T.replace "\n" "\\\\n". T.replace "\"" "\\\""

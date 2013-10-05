@@ -59,5 +59,6 @@ forAllFiles _source f = do
         isInteresting :: FilePath -> Yak Bool
         isInteresting "."     = return False
         isInteresting ".."    = return False
+        isInteresting ('.':_) = return False
         isInteresting ('_':_) = return False
         isInteresting fp      = fmap ((/= fp) . siteOutput) ask

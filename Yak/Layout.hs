@@ -25,19 +25,21 @@ loadLayouts _layouts = do
     if exists
         then do
             layoutFiles <- getDirectoryContents _layouts
-            return . M.fromList =<< toMapList layoutFiles
+            return . M.fromList =<< toMapList _layouts layoutFiles
 
         else return M.empty
 
     where
-        toMapList :: [FilePath] -> IO [(Text, Layout)]
-        toMapList = mapM toMapListItem . filter (`notElem` [".", ".."])
+        toMapList :: FilePath -> [FilePath] -> IO [(Text, Layout)]
+        toMapList _layouts = mapM (toMapListItem _layouts) . filter (`notElem` [".", ".."])
 
-        toMapListItem :: FilePath -> IO (Text, Layout)
-        toMapListItem fp = do
-            layout <- readLayout fp
+        toMapListItem :: FilePath -> FilePath -> IO (Text, Layout)
+        toMapListItem _layouts fp = do
+            let path = _layouts </> fp
 
-            return (T.pack $ dropExtension fp, layout)
+            layout <- readLayout path
+
+            return (T.pack $ dropExtension path, layout)
 
         readLayout :: FilePath -> IO Layout
         readLayout fp = do

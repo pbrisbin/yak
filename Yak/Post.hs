@@ -22,18 +22,20 @@ loadPosts _posts = do
     if exists
         then do
             postFiles <- getDirectoryContents _posts
-            mapM toPost $ filter isPost postFiles
+            mapM (toPost _posts) $ filter isPost postFiles
 
         else return []
 
     where
-        toPost :: FilePath -> IO Post
-        toPost fp = do
-            (fm, content) <- splitFrontMatter fp
+        toPost :: FilePath -> FilePath -> IO Post
+        toPost _posts fp = do
+            let path = _posts </> fp
+
+            (fm, content) <- splitFrontMatter path
 
             html <- pandoc content
 
-            let slug = T.pack $ dropExtension fp
+            let slug = T.pack $ dropExtension path
 
             return Post
                 { postLayout    = fmLayout fm

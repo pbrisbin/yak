@@ -39,7 +39,7 @@ loadLayouts _layouts = do
 
             layout <- readLayout path
 
-            return (T.pack $ dropExtension path, layout)
+            return (T.pack $ dropExtension fp, layout)
 
         readLayout :: FilePath -> IO Layout
         readLayout fp = do

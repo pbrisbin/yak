@@ -35,7 +35,7 @@ loadPosts _posts = do
 
             html <- pandoc content
 
-            let slug = T.pack $ dropExtension path
+            let slug = T.pack $ dropExtension fp
 
             return Post
                 { postLayout    = fmLayout fm

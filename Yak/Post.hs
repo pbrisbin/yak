@@ -60,13 +60,16 @@ renderPost p = do
             , "index.html"
             ]
 
+
     mlayout <- findLayout $ postLayout p
 
     rendered <- case mlayout of
         Just layout -> renderPostWithLayout p layout
         Nothing     -> renderPostWithoutLayout p
 
-    liftIO $ T.writeFile path rendered
+    liftIO $ do
+        ensureDirectory path
+        T.writeFile path rendered
 
 renderPostWithLayout :: Post -> Layout -> Yak Text
 renderPostWithLayout p layout = do
@@ -83,3 +86,8 @@ renderPostWithoutLayout :: Post -> Yak Text
 renderPostWithoutLayout p = do
     let context = withPostContext (postContent p) p
     liftIO $ liquid (postContent p) context
+
+ensureDirectory :: FilePath -> IO ()
+ensureDirectory fp = do
+    let (dir,_) = splitFileName fp
+    createDirectoryIfMissing True dir

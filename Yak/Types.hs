@@ -68,8 +68,8 @@ withSiteContext content = do
         "content": "#{escape content}",
         "site": {
             "title": "#{escape $ siteTitle site}",
-            "url": "#{escape $ siteUrl site}",
-            "posts": [#{escape $ T.intercalate ", " $ map postContext $ sitePosts site}]
+            "url": "#{siteUrl site}",
+            "posts": [#{T.intercalate ", " $ map postContext $ sitePosts site}]
         }
     }
     |]
@@ -78,7 +78,7 @@ withPostContext :: Text -> Post -> Text
 withPostContext content p = [st|
 {
     "content": "#{escape content}",
-    "post": #{escape $ postContext p}
+    "post": #{postContext p}
 }
 |]
 
@@ -86,9 +86,9 @@ postContext :: Post -> Text
 postContext p = [st|
 {
     "title": "#{escape $ postTitle p}",
-    "permalink": "#{escape $ postPermalink p}",
-    "content": "#{escape $ postContent p}"
-    "tags": [#{escape $ T.intercalate ", " $ postTags p}],
+    "permalink": "#{postPermalink p}",
+    "content": "#{escape $ postContent p}",
+    "tags": ["#{T.intercalate "\", \"" $ map escape $ postTags p}"]
 }
 |]
 
